@@ -1,16 +1,16 @@
 import java.util.ArrayList;
 
 public class Movie {
-    private int movieId;
+    private long movieId;
     private String title;
-    private ArrayList<Genre> genres = null;
+    private ArrayList<Genre> genres = new ArrayList<>();
 
-    public Movie(int movieId, String title) {
+    public Movie(long movieId, String title) {
         this.movieId = movieId;
         this.title = title;
     }
 
-    public int getMovieId() {
+    public long getMovieId() {
         return movieId;
     }
 
@@ -32,5 +32,14 @@ public class Movie {
 
     public void addGenre(Genre genre) {
         genres.add(genre);
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "movieId=" + movieId +
+                ", title='" + title + '\'' +
+                ", genres=" + genres +
+                '}';
     }
 }
