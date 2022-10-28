@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Movie {
     private long movieId;
     private String title;
-    private ArrayList<Genre> genres = new ArrayList<>();
+    private ArrayList<String> genres = new ArrayList<>();
 
     public Movie(long movieId, String title) {
         this.movieId = movieId;
@@ -26,11 +26,11 @@ public class Movie {
         this.title = title;
     }
 
-    public ArrayList<Genre> getGenres() {
+    public ArrayList<String> getGenres() {
         return genres;
     }
 
-    public void addGenre(Genre genre) {
+    public void addGenre(String genre) {
         genres.add(genre);
     }
 

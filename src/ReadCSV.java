@@ -5,23 +5,13 @@ import java.util.Scanner;
 
 public class ReadCSV {
     private String filename;
-
     private ArrayList<String> csvLines = new ArrayList<>();
-    private ArrayList<Movie> movies = new ArrayList<>();
 
     public ReadCSV(String filename) {
         this.filename = filename;
     }
 
-    public ArrayList<String> getCsvLines() {
-        return csvLines;
-    }
-
-    public ArrayList<Movie> getMovies() {
-        return movies;
-    }
-
-    public void readFile() {
+    public ArrayList<String> readFile() {
         try {
             File file = new File(filename);
             Scanner myReader = new Scanner(file);
@@ -36,24 +26,7 @@ public class ReadCSV {
             System.out.println("Problem with file");
             e.printStackTrace();
         }
+
+        return csvLines;
     }
-
-    public void readCSVLines() {
-        for(String line : csvLines) {
-            String[] lineFields = line.split(",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-            Movie movie = new Movie(Long.parseLong(lineFields[0]), lineFields[1]);
-
-            if (!lineFields[2].contains("(no genres listed)")) {
-                String[] genres = lineFields[2].split("[|)]");
-
-                for(String genre : genres) {
-                    movie.addGenre(new Genre(genre));
-                }
-            }
-
-            movies.add(movie);
-        }
-    }
-
-
 }
