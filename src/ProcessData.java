@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +21,9 @@ public class ProcessData extends Thread {
         for(String line : csvLines) {
             Movie movie = getMovie(line);
 
-            countGenreInMovie(movie);
-            countMoviesInYear(movie.getYear());
-            countWordsInMovies(movie.getTitle());
+            getGenreInMovie(movie);
+            getMoviesInYear(movie.getYear());
+            getWordsInMovies(movie.getTitle());
         }
 
         System.out.println("\nMovies in Genre");
@@ -35,13 +36,22 @@ public class ProcessData extends Thread {
             System.out.println(year.getKey() + ": " + year.getValue());
         }
 
+
+
+        Map<String, Integer> sortedList = new HashMap<>();
+        wordsInMovies.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(10)
+                .forEachOrdered(x -> sortedList.put(x.getKey(), x.getValue()));
+
         System.out.println("\nWords in Movies");
-        for(Map.Entry<String, Integer> year : wordsInMovies.entrySet()) {
-            System.out.println(year.getKey() + ": " + year.getValue());
+        for(Map.Entry<String, Integer> word : sortedList.entrySet()) {
+            System.out.println(word.getKey() + ": " + word.getValue());
         }
     }
 
-    private void countGenreInMovie(Movie movie) {
+    private void getGenreInMovie(Movie movie) {
         for(String genre : movie.getGenres()) {
             if(moviesInGenre.containsKey(genre)) {
                 int sum = moviesInGenre.get(genre) + 1;
@@ -52,7 +62,7 @@ public class ProcessData extends Thread {
         }
     }
 
-    private void countMoviesInYear(int year) {
+    private void getMoviesInYear(int year) {
         if(year == 0) {
             return;
         }
@@ -65,11 +75,11 @@ public class ProcessData extends Thread {
         }
     }
 
-    private void countWordsInMovies(String title) {
+    private void getWordsInMovies(String title) {
         String[] words = title.split(" ");
 
         for(String word : words) {
-            word = word.replaceAll("[^a-zA-Z0-9_-]", "");
+            word = word.replaceAll("[^a-zA-Z0-9_-]", "").toLowerCase();
 
             if(wordsInMovies.containsKey(word)) {
                 int sum = wordsInMovies.get(word) + 1;
