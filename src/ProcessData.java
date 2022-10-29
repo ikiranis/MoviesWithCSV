@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ProcessData extends Thread {
     private ArrayList<String> csvLines = new ArrayList<>();
-    private HashMap<String, Integer> moviesInGenres = new HashMap<String, Integer>();
+    private Map<String, Integer> moviesInGenre = new HashMap<>();
+    private Map<Integer, Integer> moviesInYear = new HashMap<>();
 
     public ProcessData(ArrayList<String> csvLines) {
         this.csvLines = csvLines;
@@ -17,7 +19,55 @@ public class ProcessData extends Thread {
         for(String line : csvLines) {
             Movie movie = getMovie(line);
 
+            countGenreInMovie(movie);
+            countMoviesInYear(movie.getYear());
+        }
 
+        System.out.println("\nMovies in Genre");
+        for(Map.Entry<String, Integer> genre : moviesInGenre.entrySet()) {
+            System.out.println(genre.getKey() + ": " + genre.getValue());
+        }
+
+        System.out.println("\nMovies in Year");
+        for(Map.Entry<Integer, Integer> year : moviesInYear.entrySet()) {
+            System.out.println(year.getKey() + ": " + year.getValue());
+        }
+    }
+
+    private void countGenreInMovie(Movie movie) {
+        for(String genre : movie.getGenres()) {
+            if(moviesInGenre.containsKey(genre)) {
+                int sum = moviesInGenre.get(genre) + 1;
+                moviesInGenre.put(genre, sum);
+            } else {
+                moviesInGenre.put(genre, 1);
+            }
+        }
+    }
+
+    private void countMoviesInYear(int year) {
+        if(year == 0) {
+            return;
+        }
+
+        if(moviesInYear.containsKey(year)) {
+            int sum = moviesInYear.get(year) + 1;
+            moviesInYear.put(year, sum);
+        } else {
+            moviesInYear.put(year, 1);
+        }
+    }
+
+    /**
+     *
+     * @param title
+     * @return
+     */
+    private int getYearFromTitle(String title) {
+        try {
+            return Integer.parseInt(title.substring(title.length() - 5, title.length() - 1));
+        } catch (Exception e) {
+            return 0;
         }
     }
 
@@ -30,13 +80,8 @@ public class ProcessData extends Thread {
         String[] lineFields = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 
         String title = lineFields[1].replace("\"", "");
-        int year = 0;
 
-        try {
-            year = Integer.parseInt(title.substring(title.length() - 5, title.length() - 1));
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        int year = getYearFromTitle(title);
 
         title = title.replace(" (" + String.valueOf(year) + ")", "");
 
@@ -47,8 +92,6 @@ public class ProcessData extends Thread {
                 movie.addGenre(genre);
             }
         }
-
-        System.out.println(movie);
 
         return movie;
     }
