@@ -10,16 +10,46 @@ public class ProcessData extends Thread {
     }
 
     public void run() {
+        processLines();
+    }
+
+    private void processLines() {
         for(String line : csvLines) {
-            String[] lineFields = line.split(",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
+            Movie movie = getMovie(line);
 
-            Movie movie = new Movie(Long.parseLong(lineFields[0]), lineFields[1]);
 
-            if (!lineFields[2].contains("(no genres listed)")) {
-                for(String genre : lineFields[2].split("[|)]")) {
-                    movie.addGenre(genre);
-                }
+        }
+    }
+
+    /**
+     *
+     * @param line
+     * @return movie
+     */
+    private Movie getMovie(String line) {
+        String[] lineFields = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+
+        String title = lineFields[1].replace("\"", "");
+        int year = 0;
+
+        try {
+            year = Integer.parseInt(title.substring(title.length() - 5, title.length() - 1));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        title = title.replace(" (" + String.valueOf(year) + ")", "");
+
+        Movie movie = new Movie(Long.parseLong(lineFields[0]), title, year);
+
+        if (!lineFields[2].contains("(no genres listed)")) {
+            for (String genre : lineFields[2].split("[|)]")) {
+                movie.addGenre(genre);
             }
         }
+
+        System.out.println(movie);
+
+        return movie;
     }
 }

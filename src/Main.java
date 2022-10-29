@@ -6,7 +6,14 @@ public class Main {
 
         ArrayList<String> csvLines = readCSV.readFile();
 
+        ProcessData process = new ProcessData(csvLines);
+        process.start();
 
+        try {
+            process.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
     }
