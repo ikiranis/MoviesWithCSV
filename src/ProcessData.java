@@ -37,18 +37,22 @@ public class ProcessData extends Thread {
         }
 
 
-
-        Map<String, Integer> sortedList = new HashMap<>();
+        Map<String, Integer> sortedWords = new HashMap<>();
         wordsInMovies.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .limit(10)
-                .forEachOrdered(x -> sortedList.put(x.getKey(), x.getValue()));
+                .forEachOrdered(x -> sortedWords.put(x.getKey(), x.getValue()));
+
 
         System.out.println("\nWords in Movies");
-        for(Map.Entry<String, Integer> word : sortedList.entrySet()) {
+        int counter = 0;
+        for(Map.Entry<String, Integer> word : sortedWords.entrySet()) {
             System.out.println(word.getKey() + ": " + word.getValue());
+            counter += word.getValue();
         }
+
+        System.out.println("\nΣύνολο εμφανίσεων των πιο συχνών λέξεων: " + counter);
     }
 
     private void getGenreInMovie(Movie movie) {
@@ -76,10 +80,15 @@ public class ProcessData extends Thread {
     }
 
     private void getWordsInMovies(String title) {
-        String[] words = title.split(" ");
+        String[] words = title.replaceAll("^[.,\\s]+", "").split("[.,\\s]+");
+//        The call to replaceAll() removes leading separators.
+//                The split is done on any number of separators.
+//
+//        The behaviour of split() means that a trailing blank value is ignored, so no need to trim trailing separators before splitting.
+
 
         for(String word : words) {
-            word = word.replaceAll("[^a-zA-Z0-9_-]", "").toLowerCase();
+            word = word.toLowerCase();
 
             if(wordsInMovies.containsKey(word)) {
                 int sum = wordsInMovies.get(word) + 1;
