@@ -6,6 +6,7 @@ public class ProcessData extends Thread {
     private ArrayList<String> csvLines = new ArrayList<>();
     private Map<String, Integer> moviesInGenre = new HashMap<>();
     private Map<Integer, Integer> moviesInYear = new HashMap<>();
+    private Map<String, Integer> wordsInMovies = new HashMap<>();
 
     public ProcessData(ArrayList<String> csvLines) {
         this.csvLines = csvLines;
@@ -21,6 +22,7 @@ public class ProcessData extends Thread {
 
             countGenreInMovie(movie);
             countMoviesInYear(movie.getYear());
+            countWordsInMovies(movie.getTitle());
         }
 
         System.out.println("\nMovies in Genre");
@@ -30,6 +32,11 @@ public class ProcessData extends Thread {
 
         System.out.println("\nMovies in Year");
         for(Map.Entry<Integer, Integer> year : moviesInYear.entrySet()) {
+            System.out.println(year.getKey() + ": " + year.getValue());
+        }
+
+        System.out.println("\nWords in Movies");
+        for(Map.Entry<String, Integer> year : wordsInMovies.entrySet()) {
             System.out.println(year.getKey() + ": " + year.getValue());
         }
     }
@@ -55,6 +62,21 @@ public class ProcessData extends Thread {
             moviesInYear.put(year, sum);
         } else {
             moviesInYear.put(year, 1);
+        }
+    }
+
+    private void countWordsInMovies(String title) {
+        String[] words = title.split(" ");
+
+        for(String word : words) {
+            word = word.replaceAll("[^a-zA-Z0-9_-]", "");
+
+            if(wordsInMovies.containsKey(word)) {
+                int sum = wordsInMovies.get(word) + 1;
+                wordsInMovies.put(word, sum);
+            } else {
+                wordsInMovies.put(word, 1);
+            }
         }
     }
 
