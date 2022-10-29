@@ -128,10 +128,8 @@ public class ProcessData extends Thread {
 
         Movie movie = new Movie(Long.parseLong(lineFields[0]), title, year);
 
-        if (!lineFields[2].contains("(no genres listed)")) {
-            for (String genre : lineFields[2].split("[|)]")) {
-                movie.addGenre(genre);
-            }
+        for (String genre : lineFields[2].split("[|]")) {
+            movie.addGenre(genre);
         }
 
         return movie;
