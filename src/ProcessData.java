@@ -1,58 +1,48 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProcessData extends Thread {
-    private ArrayList<String> csvLines = new ArrayList<>();
+    private ArrayList<String> csvLines;
     private Map<String, Integer> moviesInGenre = new HashMap<>();
     private Map<Integer, Integer> moviesInYear = new HashMap<>();
     private Map<String, Integer> wordsInMovies = new HashMap<>();
+    private int start;
+    private int batchSize;
 
-    public ProcessData(ArrayList<String> csvLines) {
+    public ProcessData(ArrayList<String> csvLines, int start, int batchSize)
+    {
         this.csvLines = csvLines;
+        this.start = start;
+        this.batchSize = batchSize;
+    }
+
+    public Map<String, Integer> getMoviesInGenre() {
+        return moviesInGenre;
+    }
+
+    public Map<Integer, Integer> getMoviesInYear() {
+        return moviesInYear;
+    }
+
+    public Map<String, Integer> getWordsInMovies() {
+        return wordsInMovies;
     }
 
     public void run() {
+        System.out.println(Thread.currentThread().getName() + " started. Επεξεργασία " + batchSize + " γραμμών");
         processLines();
+        System.out.println(Thread.currentThread().getName() + " finished");
     }
 
     private void processLines() {
-        for(String line : csvLines) {
-            Movie movie = getMovie(line);
+        for (int i=start; i<(start + batchSize); i++) {
+            Movie movie = getMovie(csvLines.get(i));
 
             getGenreInMovie(movie);
             getMoviesInYear(movie.getYear());
             getWordsInMovies(movie.getTitle());
         }
-
-        System.out.println("\nMovies in Genre");
-        for(Map.Entry<String, Integer> genre : moviesInGenre.entrySet()) {
-            System.out.println(genre.getKey() + ": " + genre.getValue());
-        }
-
-        System.out.println("\nMovies in Year");
-        for(Map.Entry<Integer, Integer> year : moviesInYear.entrySet()) {
-            System.out.println(year.getKey() + ": " + year.getValue());
-        }
-
-
-        Map<String, Integer> sortedWords = new HashMap<>();
-        wordsInMovies.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(10)
-                .forEachOrdered(x -> sortedWords.put(x.getKey(), x.getValue()));
-
-
-        System.out.println("\nWords in Movies");
-        int counter = 0;
-        for(Map.Entry<String, Integer> word : sortedWords.entrySet()) {
-            System.out.println(word.getKey() + ": " + word.getValue());
-            counter += word.getValue();
-        }
-
-        System.out.println("\nΣύνολο εμφανίσεων των πιο συχνών λέξεων: " + counter);
     }
 
     private void getGenreInMovie(Movie movie) {
