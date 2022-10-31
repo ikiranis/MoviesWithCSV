@@ -3,10 +3,10 @@ import java.util.ArrayList;
 public class Movie {
     private long movieId;
     private String title;
-    private int year;
+    private String year;
     private ArrayList<String> genres = new ArrayList<>();
 
-    public Movie(long movieId, String title, int year) {
+    public Movie(long movieId, String title, String year) {
         this.movieId = movieId;
         this.title = title;
         this.year = year;
@@ -36,11 +36,11 @@ public class Movie {
         genres.add(genre);
     }
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(String year) {
         this.year = year;
     }
 

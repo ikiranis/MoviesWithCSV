@@ -1,14 +1,11 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
-    private static final int maxThreads = 2;    // Μέγιστος αριθμός threads, σε δυνάμεις του 2
+    private static final int maxThreads = 3;    // Μέγιστος αριθμός threads, σε δυνάμεις του 2
     private static ProcessData[] processes;
 
     private static Map<String, Integer> moviesInGenre;
-    private static Map<Integer, Integer> moviesInYear;
+    private static Map<String, Integer> moviesInYear;
     private static Map<String, Integer> wordsInMovies;
 
     /**
@@ -37,43 +34,70 @@ public class Main {
         }
     }
 
-    private static void addInGenres(Map<String, Integer> genres) {
-        genres.entrySet()
-                .forEach(x -> {
-                    if(moviesInGenre.containsKey(x.getKey())) {
-                        int newValue = moviesInGenre.get(x.getKey()) + x.getValue();
+    private static void addNewProcessData(Map<String, Integer> newData, Map<String, Integer> data) {
+        newData.entrySet()
+            .forEach(x -> {
+                if(data.containsKey(x.getKey())) {
+                    int newValue = data.get(x.getKey()) + x.getValue();
 
-                        moviesInGenre.put(x.getKey(), newValue);
-                    } else {
-                        moviesInGenre.put(x.getKey(), x.getValue());
-                    }
-                });
+                    data.put(x.getKey(), newValue);
+                } else {
+                    data.put(x.getKey(), x.getValue());
+                }
+            });
     }
 
-    private static void addInYears(Map<Integer, Integer> years) {
-        years.entrySet()
-                .forEach(x -> {
-                    if(moviesInYear.containsKey(x.getKey())) {
-                        int newValue = moviesInYear.get(x.getKey()) + x.getValue();
+    private static void addNewDataFromProcesses() {
+        // Αρχικοποίηση hashmaps
+        moviesInGenre = new HashMap<>();
+        moviesInYear = new HashMap<>();
+        wordsInMovies = new HashMap<>();
 
-                        moviesInYear.put(x.getKey(), newValue);
-                    } else {
-                        moviesInYear.put(x.getKey(), x.getValue());
-                    }
-                });
+        for (ProcessData process: processes) {
+            addNewProcessData(process.getMoviesInGenre(), moviesInGenre);
+            addNewProcessData(process.getMoviesInYear(), moviesInYear);
+            addNewProcessData(process.getWordsInMovies(), wordsInMovies);
+        }
     }
 
-    private static void addInWords(Map<String, Integer> words) {
-        words.entrySet()
-                .forEach(x -> {
-                    if(wordsInMovies.containsKey(x.getKey())) {
-                        int newValue = wordsInMovies.get(x.getKey()) + x.getValue();
+    private static void printMoviesInGenre() {
+        System.out.println("\nΤαινίες που βρέθηκαν σε κάθε κατηγορία");
+        System.out.println("--------------------------------------");
+        for(Map.Entry<String, Integer> genre : moviesInGenre.entrySet()) {
+            if(!genre.getKey().contains("(no genres listed)")) {
+                System.out.printf("Στην κατηγορία %s, βρέθηκαν %s ταινίες\n", genre.getKey(), genre.getValue());
+            }
+        }
 
-                        wordsInMovies.put(x.getKey(), newValue);
-                    } else {
-                        wordsInMovies.put(x.getKey(), x.getValue());
-                    }
-                });
+        System.out.printf("\nΧωρίς κατηγορία βρέθηκαν %s ταινίες\n", moviesInGenre.get("(no genres listed)"));
+    }
+
+    private static void printMoviesInYear() {
+        System.out.println("\nΤαινίες που βρέθηκαν σε κάθε έτος");
+        System.out.println("---------------------------------");
+        for(Map.Entry<String, Integer> year : moviesInYear.entrySet()) {
+            System.out.printf("Το έτος %s, βρέθηκαν %s ταινίες\n", year.getKey(), year.getValue());
+        }
+    }
+
+    private static void printWordsInMovies() {
+        Map<String, Integer> sortedWords = new LinkedHashMap<>();
+        wordsInMovies.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(10)
+                .forEachOrdered(x -> sortedWords.put(x.getKey(), x.getValue()));
+
+
+        System.out.println("\n10 πιο συχνές λέξεις σε τίτλους ταινιών");
+        System.out.println("---------------------------------------");
+        int counter = 0;
+        for(Map.Entry<String, Integer> word : sortedWords.entrySet()) {
+            System.out.printf("Η λέξη \"%s\", βρέθηκε %s φορές\n", word.getKey(), word.getValue());
+            counter += word.getValue();
+        }
+
+        System.out.println("\nΣύνολο εμφανίσεων των πιο συχνών λέξεων: " + counter);
     }
 
     public static void main(String[] args) {
@@ -85,13 +109,14 @@ public class Main {
         for (int i=0; i<=maxThreads; i++) {
             int threadsNumber = (int) Math.pow(2, i);  // Πλήθος threads σε δυνάμεις του 2
 
-            // Αρχικοποίηση hashmaps
-            moviesInGenre = new HashMap<>();
-            moviesInYear = new HashMap<>();
-            wordsInMovies = new HashMap<>();
-
             // Αρχικοποίηση του array των threads με την κλάση HammingCalculator
             processes = new ProcessData[threadsNumber];
+
+            System.out.println("\n==================================================================");
+            System.out.println("Επεξεργασία " + csvLines.size() + " γραμμών, με "
+                    + threadsNumber
+                    + ((threadsNumber>1) ? " threads" : " thread")
+                    + "\n");
 
             // Αρχικοποίηση του χρόνου που αρχίζει η επεξεργασία
             long start = System.currentTimeMillis();
@@ -103,39 +128,13 @@ public class Main {
             // Τερματισμός του χρόνου επεξεργασίας
             long end = System.currentTimeMillis();
 
-            for (ProcessData process: processes) {
-                addInGenres(process.getMoviesInGenre());
-                addInYears(process.getMoviesInYear());
-                addInWords(process.getWordsInMovies());
-            }
+            addNewDataFromProcesses();
 
-            System.out.println("\nMovies in Genre");
-            for(Map.Entry<String, Integer> genre : moviesInGenre.entrySet()) {
-                System.out.println(genre.getKey() + ": " + genre.getValue());
-            }
+            printMoviesInGenre();
 
-            System.out.println("\nMovies in Year");
-            for(Map.Entry<Integer, Integer> year : moviesInYear.entrySet()) {
-                System.out.println(year.getKey() + ": " + year.getValue());
-            }
+            printMoviesInYear();
 
-
-            Map<String, Integer> sortedWords = new HashMap<>();
-            wordsInMovies.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                    .limit(10)
-                    .forEachOrdered(x -> sortedWords.put(x.getKey(), x.getValue()));
-
-
-            System.out.println("\nWords in Movies");
-            int counter = 0;
-            for(Map.Entry<String, Integer> word : sortedWords.entrySet()) {
-                System.out.println(word.getKey() + ": " + word.getValue());
-                counter += word.getValue();
-            }
-
-            System.out.println("\nΣύνολο εμφανίσεων των πιο συχνών λέξεων: " + counter);
+            printWordsInMovies();
 
             System.out.println("\nΧρονική διάρκεια επεξεργασίας: " + (end - start) + "msec");
         }

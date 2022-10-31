@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 public class ProcessData extends Thread {
     private ArrayList<String> csvLines;
     private Map<String, Integer> moviesInGenre = new HashMap<>();
-    private Map<Integer, Integer> moviesInYear = new HashMap<>();
+    private Map<String, Integer> moviesInYear = new HashMap<>();
     private Map<String, Integer> wordsInMovies = new HashMap<>();
     private int start;
     private int batchSize;
@@ -21,7 +23,7 @@ public class ProcessData extends Thread {
         return moviesInGenre;
     }
 
-    public Map<Integer, Integer> getMoviesInYear() {
+    public Map<String, Integer> getMoviesInYear() {
         return moviesInYear;
     }
 
@@ -56,8 +58,8 @@ public class ProcessData extends Thread {
         }
     }
 
-    private void calcMoviesInYear(int year) {
-        if(year == 0) {
+    private void calcMoviesInYear(String year) {
+        if(year.equals("0")) {
             return;
         }
 
@@ -70,21 +72,22 @@ public class ProcessData extends Thread {
     }
 
     private void calcWordsInMovies(String title) {
-        String[] words = title.replaceAll("^[.,\\s]+", "").split("[.,\\s]+");
-//        The call to replaceAll() removes leading separators.
-//                The split is done on any number of separators.
-//
-//        The behaviour of split() means that a trailing blank value is ignored, so no need to trim trailing separators before splitting.
-
+        String[] words = Pattern.compile("\\b(?:\\w|-)+\\b")
+                .matcher(title)
+                .results()
+                .map(MatchResult::group)
+                .toArray(String[]::new);
 
         for(String word : words) {
             word = word.toLowerCase();
 
-            if(wordsInMovies.containsKey(word)) {
-                int sum = wordsInMovies.get(word) + 1;
-                wordsInMovies.put(word, sum);
-            } else {
-                wordsInMovies.put(word, 1);
+            if(word.length()>1) {
+                if(wordsInMovies.containsKey(word)) {
+                    int sum = wordsInMovies.get(word) + 1;
+                    wordsInMovies.put(word, sum);
+                } else {
+                    wordsInMovies.put(word, 1);
+                }
             }
         }
     }
@@ -116,7 +119,7 @@ public class ProcessData extends Thread {
 
         title = title.replace(" (" + String.valueOf(year) + ")", "");
 
-        Movie movie = new Movie(Long.parseLong(lineFields[0]), title, year);
+        Movie movie = new Movie(Long.parseLong(lineFields[0]), title, String.valueOf(year));
 
         for (String genre : lineFields[2].split("[|]")) {
             movie.addGenre(genre);
