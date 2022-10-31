@@ -4,8 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
-    private static final int maxThreads = 0;    // Μέγιστος αριθμός threads, σε δυνάμεις του 2
+    private static final int maxThreads = 2;    // Μέγιστος αριθμός threads, σε δυνάμεις του 2
     private static ProcessData[] processes;
+
+    private static Map<String, Integer> moviesInGenre;
+    private static Map<Integer, Integer> moviesInYear;
+    private static Map<String, Integer> wordsInMovies;
 
     /**
      * Εκκίνηση όλων των threads, περνώντας τις αντίστοιχες παραμέτρους δεδομένων σε κάθε ένα
@@ -33,6 +37,45 @@ public class Main {
         }
     }
 
+    private static void addInGenres(Map<String, Integer> genres) {
+        genres.entrySet()
+                .forEach(x -> {
+                    if(moviesInGenre.containsKey(x.getKey())) {
+                        int newValue = moviesInGenre.get(x.getKey()) + x.getValue();
+
+                        moviesInGenre.put(x.getKey(), newValue);
+                    } else {
+                        moviesInGenre.put(x.getKey(), x.getValue());
+                    }
+                });
+    }
+
+    private static void addInYears(Map<Integer, Integer> years) {
+        years.entrySet()
+                .forEach(x -> {
+                    if(moviesInYear.containsKey(x.getKey())) {
+                        int newValue = moviesInYear.get(x.getKey()) + x.getValue();
+
+                        moviesInYear.put(x.getKey(), newValue);
+                    } else {
+                        moviesInYear.put(x.getKey(), x.getValue());
+                    }
+                });
+    }
+
+    private static void addInWords(Map<String, Integer> words) {
+        words.entrySet()
+                .forEach(x -> {
+                    if(wordsInMovies.containsKey(x.getKey())) {
+                        int newValue = wordsInMovies.get(x.getKey()) + x.getValue();
+
+                        wordsInMovies.put(x.getKey(), newValue);
+                    } else {
+                        wordsInMovies.put(x.getKey(), x.getValue());
+                    }
+                });
+    }
+
     public static void main(String[] args) {
         ReadCSV readCSV = new ReadCSV("movies.csv");
 
@@ -41,6 +84,11 @@ public class Main {
         // Δοκιμή επεξεργασίας με διαφορετικό πλήθος threads
         for (int i=0; i<=maxThreads; i++) {
             int threadsNumber = (int) Math.pow(2, i);  // Πλήθος threads σε δυνάμεις του 2
+
+            // Αρχικοποίηση hashmaps
+            moviesInGenre = new HashMap<>();
+            moviesInYear = new HashMap<>();
+            wordsInMovies = new HashMap<>();
 
             // Αρχικοποίηση του array των threads με την κλάση HammingCalculator
             processes = new ProcessData[threadsNumber];
@@ -55,19 +103,25 @@ public class Main {
             // Τερματισμός του χρόνου επεξεργασίας
             long end = System.currentTimeMillis();
 
+            for (ProcessData process: processes) {
+                addInGenres(process.getMoviesInGenre());
+                addInYears(process.getMoviesInYear());
+                addInWords(process.getWordsInMovies());
+            }
+
             System.out.println("\nMovies in Genre");
-            for(Map.Entry<String, Integer> genre : processes[0].getMoviesInGenre().entrySet()) {
+            for(Map.Entry<String, Integer> genre : moviesInGenre.entrySet()) {
                 System.out.println(genre.getKey() + ": " + genre.getValue());
             }
 
             System.out.println("\nMovies in Year");
-            for(Map.Entry<Integer, Integer> year : processes[0].getMoviesInYear().entrySet()) {
+            for(Map.Entry<Integer, Integer> year : moviesInYear.entrySet()) {
                 System.out.println(year.getKey() + ": " + year.getValue());
             }
 
 
             Map<String, Integer> sortedWords = new HashMap<>();
-            processes[0].getWordsInMovies().entrySet()
+            wordsInMovies.entrySet()
                     .stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .limit(10)
@@ -85,10 +139,6 @@ public class Main {
 
             System.out.println("\nΧρονική διάρκεια επεξεργασίας: " + (end - start) + "msec");
         }
-
-
-
-
 
     }
 }

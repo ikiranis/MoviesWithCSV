@@ -39,13 +39,13 @@ public class ProcessData extends Thread {
         for (int i=start; i<(start + batchSize); i++) {
             Movie movie = getMovie(csvLines.get(i));
 
-            getGenreInMovie(movie);
-            getMoviesInYear(movie.getYear());
-            getWordsInMovies(movie.getTitle());
+            calcGenreInMovie(movie);
+            calcMoviesInYear(movie.getYear());
+            calcWordsInMovies(movie.getTitle());
         }
     }
 
-    private void getGenreInMovie(Movie movie) {
+    private void calcGenreInMovie(Movie movie) {
         for(String genre : movie.getGenres()) {
             if(moviesInGenre.containsKey(genre)) {
                 int sum = moviesInGenre.get(genre) + 1;
@@ -56,7 +56,7 @@ public class ProcessData extends Thread {
         }
     }
 
-    private void getMoviesInYear(int year) {
+    private void calcMoviesInYear(int year) {
         if(year == 0) {
             return;
         }
@@ -69,7 +69,7 @@ public class ProcessData extends Thread {
         }
     }
 
-    private void getWordsInMovies(String title) {
+    private void calcWordsInMovies(String title) {
         String[] words = title.replaceAll("^[.,\\s]+", "").split("[.,\\s]+");
 //        The call to replaceAll() removes leading separators.
 //                The split is done on any number of separators.
