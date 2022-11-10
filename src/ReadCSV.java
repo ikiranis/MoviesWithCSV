@@ -3,14 +3,22 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Κλάση που διαβάζει ένα αρχείο CSV
+ */
 public class ReadCSV {
-    private String filename;
-    private ArrayList<String> csvLines = new ArrayList<>();
+    private String filename;        // Το όνομα του αρχείου CSV
+    private ArrayList<String> csvLines = new ArrayList<>();     // Array με τις γραμμές του CSV
 
     public ReadCSV(String filename) {
         this.filename = filename;
     }
 
+    /**
+     * Διάβασμα του αρχείου και προσθήκη στο array με τις γραμμές
+     *
+     * @return
+     */
     public ArrayList<String> readFile() {
         try {
             File file = new File(filename);
