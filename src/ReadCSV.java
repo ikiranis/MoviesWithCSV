@@ -25,6 +25,7 @@ public class ReadCSV {
             Scanner myReader = new Scanner(file);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
+                // Αγνοεί την πρώτη γραμμή που έχει το όνομα των πεδίων
                 if (!data.contains("movieId,title,genres")) {
                     csvLines.add(data);
                 }
